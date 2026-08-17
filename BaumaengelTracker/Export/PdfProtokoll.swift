@@ -12,10 +12,13 @@ enum PdfProtokoll {
         }
     }
 
-    static func erstellen(fuer projekt: Projekt) throws -> URL {
+    /// Läuft bewusst auf einem Abzug der Daten, nicht auf den Modellen — so
+    /// kann der Satz im Hintergrund laufen, während die Oberfläche bedienbar bleibt.
+    static func erstellen(aus daten: ProtokollDaten) throws -> URL {
+        let beginn = Date.now
         let format = UIGraphicsPDFRendererFormat()
         format.documentInfo = [
-            kCGPDFContextTitle as String: "Mängelprotokoll \(projekt.name)",
+            kCGPDFContextTitle as String: "Mängelprotokoll \(daten.name)",
             kCGPDFContextCreator as String: "Baumängel Tracker"
         ]
         // Erster Durchgang nur zum Zählen, damit «Seite 2 von 5» stimmen kann.
@@ -23,29 +26,36 @@ enum PdfProtokoll {
         // liefert ein leeres Dokument.
         var seitenZahl = 0
         _ = UIGraphicsPDFRenderer(bounds: Seitensatz.seite, format: format).pdfData { kontext in
-            let satz = Seitensatz(kontext: kontext, projekt: projekt, gesamt: nil)
-            zeichnen(projekt: projekt, satz: satz)
+            let satz = Seitensatz(kontext: kontext, daten: daten, gesamt: nil)
+            zeichnen(daten: daten, satz: satz)
             seitenZahl = satz.seitenzahl
         }
 
-        let daten = UIGraphicsPDFRenderer(bounds: Seitensatz.seite, format: format).pdfData { kontext in
-            let satz = Seitensatz(kontext: kontext, projekt: projekt, gesamt: seitenZahl)
-            zeichnen(projekt: projekt, satz: satz)
+        let bytes = UIGraphicsPDFRenderer(bounds: Seitensatz.seite, format: format).pdfData { kontext in
+            let satz = Seitensatz(kontext: kontext, daten: daten, gesamt: seitenZahl)
+            zeichnen(daten: daten, satz: satz)
         }
 
-        guard !daten.isEmpty else { throw Fehler.schreiben }
+        guard !bytes.isEmpty else { throw Fehler.schreiben }
 
-        let name = dateiname(projekt)
+        let name = dateiname(daten)
         let ziel = FileManager.default.temporaryDirectory.appendingPathComponent(name)
         do {
-            try daten.write(to: ziel, options: .atomic)
+            try bytes.write(to: ziel, options: .atomic)
         } catch {
             throw Fehler.schreiben
         }
+        #if DEBUG
+        let fotos = daten.raeume.flatMap(\.maengel).reduce(0) { $0 + $1.fotoNamen.count }
+        print(String(format: "[PDF] %d Mängel, %d Fotos → %d Seiten, %.1f MB, %.2f s",
+                     daten.anzahlMaengel, fotos, seitenZahl,
+                     Double(bytes.count) / 1_048_576,
+                     Date.now.timeIntervalSince(beginn)))
+        #endif
         return ziel
     }
 
-    static func dateiname(_ projekt: Projekt) -> String {
+    static func dateiname(_ projekt: ProtokollDaten) -> String {
         let erlaubt = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_ "))
         let sauber = projekt.name.unicodeScalars
             .map { erlaubt.contains($0) ? Character($0) : "-" }
@@ -57,22 +67,19 @@ enum PdfProtokoll {
 
     // MARK: - Aufbau
 
-    private static func zeichnen(projekt: Projekt, satz: Seitensatz) {
+    private static func zeichnen(daten: ProtokollDaten, satz: Seitensatz) {
         satz.neueSeite()
-        satz.kopfblock(projekt: projekt)
+        satz.kopfblock(daten)
 
-        var nummerRaum = 0
-        for raum in projekt.raeumeSortiert {
-            let maengel = raum.maengelSortiert
-            guard !maengel.isEmpty else { continue }
-            nummerRaum += 1
+        for (index, raum) in daten.raeume.enumerated() {
+            let nummerRaum = index + 1
             satz.raumTitel(nummer: nummerRaum, raum: raum)
-            for (index, mangel) in maengel.enumerated() {
-                satz.mangelBlock(nummer: "\(nummerRaum).\(index + 1)", mangel: mangel)
+            for (position, mangel) in raum.maengel.enumerated() {
+                satz.mangelBlock(nummer: "\(nummerRaum).\(position + 1)", mangel: mangel)
             }
         }
 
-        if projekt.alleMaengel.isEmpty {
+        if daten.anzahlMaengel == 0 {
             satz.absatz("In diesem Projekt ist noch kein Mangel erfasst.",
                         schrift: .systemFont(ofSize: 11), farbe: .darkGray)
         }
@@ -88,7 +95,7 @@ private final class Seitensatz {
     private let fussHoehe: CGFloat = 30
 
     private let kontext: UIGraphicsPDFRendererContext
-    private let projekt: Projekt
+    private let daten: ProtokollDaten
     private let gesamt: Int?
 
     private(set) var seitenzahl = 0
@@ -97,9 +104,9 @@ private final class Seitensatz {
     private var breite: CGFloat { Seitensatz.seite.width - 2 * rand }
     private var unterkante: CGFloat { Seitensatz.seite.height - rand - fussHoehe }
 
-    init(kontext: UIGraphicsPDFRendererContext, projekt: Projekt, gesamt: Int?) {
+    init(kontext: UIGraphicsPDFRendererContext, daten: ProtokollDaten, gesamt: Int?) {
         self.kontext = kontext
-        self.projekt = projekt
+        self.daten = daten
         self.gesamt = gesamt
     }
 
@@ -118,7 +125,7 @@ private final class Seitensatz {
     }
 
     private func laufenderKopf() {
-        let text = "Mängelprotokoll · \(projekt.name)"
+        let text = "Mängelprotokoll · \(daten.name)"
         zeichne(text, schrift: .systemFont(ofSize: 8), farbe: .gray,
                 bei: CGRect(x: rand, y: rand - 14, width: breite, height: 12))
         linie(bei: rand - 2, farbe: UIColor.black.withAlphaComponent(0.12))
@@ -137,7 +144,7 @@ private final class Seitensatz {
 
     // MARK: Blöcke
 
-    func kopfblock(projekt: Projekt) {
+    func kopfblock(_ projekt: ProtokollDaten) {
         zeichne("MÄNGELPROTOKOLL", schrift: .systemFont(ofSize: 10, weight: .semibold),
                 farbe: UIColor(red: 0.85, green: 0.42, blue: 0.10, alpha: 1),
                 bei: CGRect(x: rand, y: y, width: breite, height: 14))
@@ -163,7 +170,7 @@ private final class Seitensatz {
         y += 16
     }
 
-    func raumTitel(nummer: Int, raum: Raum) {
+    func raumTitel(nummer: Int, raum: RaumDaten) {
         platz(60)
         y += 6
         zeichne("\(nummer). \(raum.name)", schrift: .systemFont(ofSize: 15, weight: .semibold),
@@ -179,7 +186,7 @@ private final class Seitensatz {
         y += 12
     }
 
-    func mangelBlock(nummer: String, mangel: Mangel) {
+    func mangelBlock(nummer: String, mangel: MangelDaten) {
         // Einen Mangel möglichst nicht über die Seitenkante brechen — sonst
         // steht ein einzelnes Foto verwaist auf der nächsten Seite.
         platz(min(blockHoehe(mangel), unterkante - rand))
@@ -225,7 +232,7 @@ private final class Seitensatz {
     }
 
     /// Geschätzte Gesamthöhe eines Mangelblocks — Grundlage für den Seitenumbruch.
-    private func blockHoehe(_ mangel: Mangel) -> CGFloat {
+    private func blockHoehe(_ mangel: MangelDaten) -> CGFloat {
         let titelSchrift = UIFont.systemFont(ofSize: 12, weight: .semibold)
         let notizSchrift = UIFont.systemFont(ofSize: 10.5)
         let inhalt = breite - 34
@@ -274,8 +281,8 @@ private final class Seitensatz {
                                 y: y, width: zelle, height: hoehe)
             UIColor(white: 0.94, alpha: 1).setFill()
             UIBezierPath(roundedRect: rahmen, cornerRadius: 4).fill()
-            // 520 px reichen für die Zellengrösse und halten die Datei mailbar.
-            if let bild = Fotospeicher.vorschau(name, kante: 520) {
+            // Verkleinert und JPEG-codiert — sonst wird das Dokument riesig.
+            if let bild = Fotospeicher.fuerDruck(name) {
                 bild.draw(in: einpassen(bild.size, in: rahmen))
             }
         }
@@ -284,13 +291,13 @@ private final class Seitensatz {
 
     // MARK: Werkzeug
 
-    private func statusMarke(mangel: Mangel, rahmen: CGRect) {
+    private func statusMarke(mangel: MangelDaten, rahmen: CGRect) {
         let offen = UIColor(red: 0.85, green: 0.42, blue: 0.10, alpha: 1)
         let behoben = UIColor(red: 0.16, green: 0.55, blue: 0.31, alpha: 1)
         let ueberfaellig = UIColor(red: 0.78, green: 0.16, blue: 0.16, alpha: 1)
 
-        let farbe = mangel.behoben ? behoben : (mangel.fristUeberschritten ? ueberfaellig : offen)
-        let text = mangel.behoben ? "BEHOBEN" : (mangel.fristUeberschritten ? "ÜBERFÄLLIG" : "OFFEN")
+        let farbe = mangel.behoben ? behoben : (mangel.ueberfaellig ? ueberfaellig : offen)
+        let text = mangel.behoben ? "BEHOBEN" : (mangel.ueberfaellig ? "ÜBERFÄLLIG" : "OFFEN")
 
         farbe.withAlphaComponent(0.12).setFill()
         UIBezierPath(roundedRect: rahmen, cornerRadius: 8).fill()

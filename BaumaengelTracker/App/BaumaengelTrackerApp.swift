@@ -21,6 +21,8 @@ struct BaumaengelTrackerApp: App {
         MainActor.assumeIsolated {
             if CommandLine.arguments.contains("-seedDemo") {
                 Demodaten.anlegen(in: container.mainContext)
+            } else if CommandLine.arguments.contains("-seedLast") {
+                Demodaten.anlegenGross(in: container.mainContext)
             }
             let maengel = (try? container.mainContext.fetch(FetchDescriptor<Mangel>())) ?? []
             Fotospeicher.aufraeumen(bekannt: Set(maengel.flatMap(\.fotoNamen)))

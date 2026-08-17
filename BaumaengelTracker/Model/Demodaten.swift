@@ -5,6 +5,34 @@ import SwiftData
 /// Startargument `-seedDemo` aufgerufen, nie im ausgelieferten Ablauf.
 enum Demodaten {
 
+    /// Grosser Bestand für den Lasttest des PDF-Exports (`-seedLast`):
+    /// sechs Räume, 60 Mängel, rund 120 Fotos.
+    @MainActor
+    static func anlegenGross(in kontext: ModelContext) {
+        let vorhanden = (try? kontext.fetch(FetchDescriptor<Projekt>()))?.isEmpty == false
+        guard !vorhanden else { return }
+
+        let projekt = Projekt(name: "Lasttest, Überbauung Nordfeld",
+                              adresse: "Musterstrasse 1–9, 5443 Musterdorf",
+                              erstelltAm: tageVorher(60))
+        kontext.insert(projekt)
+
+        let raeume = ["Küche", "Bad", "Wohnzimmer", "Schlafzimmer", "Treppenhaus", "Keller"]
+        let inhalt = raeume.enumerated().map { index, raumName in
+            (raumName, (1...10).map { nummer -> (String, String, Bool, Int, Int) in
+                let lauf = index * 10 + nummer
+                return ("Mangel \(lauf) in \(raumName)",
+                        "Beispielnotiz zum Prüfen des Seitenumbruchs. Erfasst beim Rundgang, "
+                        + "Nachbesserung ist mit der Bauleitung besprochen. Position \(lauf).",
+                        nummer % 3 == 0,
+                        (lauf % 25) + 2,
+                        nummer % 4)
+            })
+        }
+        fuellen(projekt, mit: inhalt, in: kontext)
+        try? kontext.save()
+    }
+
     @MainActor
     static func anlegen(in kontext: ModelContext) {
         let vorhanden = (try? kontext.fetch(FetchDescriptor<Projekt>()))?.isEmpty == false

@@ -116,10 +116,15 @@ struct ProjektDetailView: View {
 
     private func pdfErstellen() {
         pdfLaeuft = true
-        // Kurz verzögert, damit der Spinner sichtbar wird und die Liste nicht ruckelt.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+        // Abzug auf dem Hauptstrang ziehen, satz und Bildaufbereitung daneben —
+        // bei 60 Mängeln sind das drei Sekunden, die sonst die Oberfläche anhalten.
+        let abzug = ProtokollDaten(projekt)
+        Task {
             do {
-                pdfDatei = PdfDatei(adresse: try PdfProtokoll.erstellen(fuer: projekt))
+                let adresse = try await Task.detached(priority: .userInitiated) {
+                    try PdfProtokoll.erstellen(aus: abzug)
+                }.value
+                pdfDatei = PdfDatei(adresse: adresse)
             } catch {
                 fehlertext = error.localizedDescription
             }
