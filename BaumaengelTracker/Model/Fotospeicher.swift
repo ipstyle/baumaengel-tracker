@@ -50,6 +50,17 @@ enum Fotospeicher {
         return klein
     }
 
+    /// Für den PDF-Export: verkleinert **und** als JPEG codiert. Ein aus einem
+    /// Bitmap gezeichnetes Bild landet sonst praktisch unkomprimiert im
+    /// Dokument — bei 90 Fotos ist das der Unterschied zwischen 15 MB und 4 MB.
+    static func fuerDruck(_ name: String, kante: CGFloat = 520,
+                          qualitaet: CGFloat = 0.6) -> UIImage? {
+        guard let voll = bild(name) else { return nil }
+        let klein = verkleinern(voll, maximaleKante: kante)
+        guard let daten = klein.jpegData(compressionQuality: qualitaet) else { return klein }
+        return UIImage(data: daten)
+    }
+
     static func loeschen(_ name: String) {
         try? FileManager.default.removeItem(at: url(name))
         vorschauCache.removeAllObjects()
