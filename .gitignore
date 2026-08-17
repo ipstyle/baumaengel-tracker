@@ -1,0 +1,18 @@
+# Xcode / Build
+build/
+DerivedData/
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+*.xcuserstate
+*.moved-aside
+
+# Signierte Pakete und Profile — gehören nie ins Repo
+*.ipa
+*.xcarchive
+*.mobileprovision
+*.p8
+*.p12
+
+# macOS
+.DS_Store

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baumängel Tracker — Mängelprotokoll mit Fotodokumentation</title>
+<meta name="description" content="Räume anlegen, Mängel mit Foto und Notiz erfassen, abhaken und als PDF-Protokoll weitergeben. Kein Konto, keine Werbung, alles bleibt auf dem Gerät.">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #ffffff; --fg: #16181d; --muted: #5d636e; --line: #e3e6ea;
+    --card: #f7f8fa; --accent: #d96b1a; --accent-fg: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14161a; --fg: #e9eaee; --muted: #a0a6b0; --line: #2a2e36;
+            --card: #1c1f25; --accent: #ed852e; --accent-fg: #141013; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+         font: 16px/1.65 -apple-system, "Helvetica Neue", system-ui, sans-serif; }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 1.25rem; }
+  header { text-align: center; padding: 4rem 0 2.5rem; }
+  .icon { width: 104px; height: 104px; border-radius: 24px; display: block; margin: 0 auto 1.2rem; }
+  h1 { font-size: 2.4rem; margin: 0 0 .4rem; letter-spacing: -.02em; }
+  .tagline { font-size: 1.15rem; color: var(--muted); margin: 0 0 1.6rem; }
+  .badges { display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.6rem; }
+  .badge { font-size: .82rem; color: var(--muted); border: 1px solid var(--line);
+           border-radius: 999px; padding: .25rem .85rem; }
+  .cta { display: inline-block; background: var(--accent); color: var(--accent-fg);
+         text-decoration: none; font-weight: 600; padding: .75rem 1.5rem;
+         border-radius: 10px; margin: 0 .3rem .6rem; }
+  .cta.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  h2 { font-size: 1.3rem; margin: 3rem 0 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--line); }
+  .shots { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: .6rem; }
+  .shots img { height: 460px; border-radius: 14px; border: 1px solid var(--line); flex: 0 0 auto; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1rem 1.1rem; }
+  .card h3 { margin: 0 0 .5rem; font-size: 1rem; }
+  .card ul { margin: 0; padding-left: 1.1rem; color: var(--muted); font-size: .93rem; }
+  table { width: 100%; border-collapse: collapse; font-size: .93rem; }
+  td, th { text-align: left; padding: .55rem .2rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  p { color: var(--fg); }
+  .muted { color: var(--muted); }
+  code { background: var(--card); border: 1px solid var(--line); border-radius: 6px;
+         padding: .1rem .4rem; font-size: .88em; }
+  footer { margin: 4rem 0 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line);
+           color: var(--muted); font-size: .88rem; text-align: center; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <img class="icon" src="appicon.png" alt="App-Symbol Baumängel Tracker">
+  <h1>Baumängel Tracker</h1>
+  <p class="tagline">Mängel erfassen, mit Foto belegen, als PDF-Protokoll weitergeben.</p>
+  <div class="badges">
+    <span class="badge">Gratis</span>
+    <span class="badge">Quelloffen · MIT</span>
+    <span class="badge">Kein Konto</span>
+    <span class="badge">Keine Werbung</span>
+    <span class="badge">Ohne Netzwerkzugriff</span>
+  </div>
+  <a class="cta" href="https://github.com/ipstyle/baumaengel-tracker">Quellcode auf GitHub</a>
+  <a class="cta secondary" href="https://github.com/ipstyle/baumaengel-tracker/issues">Support &amp; Fehler melden</a>
+</header>
+
+<h2>So sieht es aus</h2>
+<div class="shots">
+  <img src="1-projekte.png" alt="Projektliste mit offenen Mängeln">
+  <img src="3-maengel.png" alt="Mängelliste eines Raums mit Filter">
+  <img src="5-pdf.png" alt="Fertiges PDF-Protokoll">
+</div>
+
+<h2>Was die App macht</h2>
+<div class="grid">
+  <div class="card"><h3>Projekte</h3><ul>
+    <li>Objekt mit Name, Adresse und Datum</li>
+    <li>Mehrere Objekte parallel führen</li>
+    <li>Fortschritt auf einen Blick</li></ul></div>
+  <div class="card"><h3>Räume</h3><ul>
+    <li>Eigene Reihenfolge, per Drag sortierbar</li>
+    <li>Offene Mängel je Raum sichtbar</li></ul></div>
+  <div class="card"><h3>Mängel</h3><ul>
+    <li>Titel, Notiz und Frist</li>
+    <li>Status offen oder behoben, mit Datum</li>
+    <li>Überfällige Fristen sind markiert</li></ul></div>
+  <div class="card"><h3>Fotos</h3><ul>
+    <li>Direkt aufnehmen oder aus der Mediathek</li>
+    <li>Mehrere Bilder je Mangel</li>
+    <li>Vollbild, einzeln löschbar</li></ul></div>
+  <div class="card"><h3>PDF-Protokoll</h3><ul>
+    <li>A4 mit Kopfdaten und Zusammenfassung</li>
+    <li>Je Raum ein Abschnitt, je Mangel ein Block</li>
+    <li>Seitenzahlen, Fotos, teilbar</li></ul></div>
+  <div class="card"><h3>Privatsphäre</h3><ul>
+    <li>Kein Konto, keine Anmeldung</li>
+    <li>Keine Werbung, keine Analyse</li>
+    <li>Alles bleibt auf dem Gerät</li></ul></div>
+</div>
+
+<h2>Voraussetzungen</h2>
+<p class="muted">iPhone ab iOS 17, Hochformat. Die App ist auf Deutsch.</p>
+
+<h2>Freigaben</h2>
+<table>
+  <tr><th>Wofür</th><th>Freigabe</th></tr>
+  <tr><td>Foto aufnehmen</td><td>Kamera — freiwillig; ohne sie geht es über die Fotomediathek</td></tr>
+  <tr><td>Bild auswählen</td><td>System-Fotoauswahl, ohne Zugriff auf die ganze Mediathek</td></tr>
+</table>
+
+<h2>Datenschutz</h2>
+<p>Die App erfasst keine Daten und stellt keine Netzwerkverbindung her. Projekte,
+Räume, Mängel, Notizen und Fotos liegen ausschliesslich im geschützten
+Datenbereich der App auf dem Gerät. Ein Protokoll verlässt das Gerät nur, wenn du
+es selbst über das System-Teilen weitergibst.</p>
+<p class="muted">Vollständig: <a href="https://github.com/ipstyle/baumaengel-tracker/blob/main/PRIVACY.md">PRIVACY.md</a></p>
+
+<h2>Support</h2>
+<p>Fragen, Fehler und Wünsche über die
+<a href="https://github.com/ipstyle/baumaengel-tracker/issues">Issues des Projekts</a>.
+Es gibt kein Konto und keine Anmeldung — eine Nachricht dort genügt.</p>
+
+<h2>Selbst bauen</h2>
+<p class="muted">Das Xcode-Projekt entsteht aus <code>project.yml</code>:</p>
+<p><code>brew install xcodegen</code> · <code>xcodegen generate</code> ·
+<code>open BaumaengelTracker.xcodeproj</code></p>
+
+<footer>
+  © 2026 ipstyle · MIT-Lizenz ·
+  <a href="https://github.com/ipstyle/baumaengel-tracker">github.com/ipstyle/baumaengel-tracker</a>
+</footer>
+
+</div>
+</body>
+</html>

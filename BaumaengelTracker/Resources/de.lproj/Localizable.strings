@@ -1,0 +1,8 @@
+/* Die Oberfläche ist durchgehend deutsch im Quelltext geschrieben.
+   Diese Datei sorgt dafür, dass das Bundle Deutsch als Sprache führt und
+   iOS seine eigenen Beschriftungen (Abbrechen, Fertig, Datumsauswahl)
+   ebenfalls auf Deutsch zeigt. */
+
+"Fertig" = "Fertig";
+"Abbrechen" = "Abbrechen";
+"Sichern" = "Sichern";
