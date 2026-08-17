@@ -57,6 +57,18 @@ xcodebuild -project BaumaengelTracker.xcodeproj -scheme BaumaengelTracker \
 Mit dem Startargument `-seedDemo` legt die App beim ersten Start neutrale
 Beispieldaten an — dafür ist `scripts/screenshots.sh` gedacht.
 
+## App-Store-Paket
+
+Bundle-ID und App-Store-Profil liegen im Entwicklerkonto; signiert wird bewusst
+manuell, weil Xcode beim Archivieren mit automatischer Signatur ein
+Entwicklungsprofil samt registriertem Gerät verlangt.
+
+```bash
+bash AppStore/build-ipa.sh bauen      # Archiv + IPA, prüft die Kamera-Begründung im Paket
+bash AppStore/build-ipa.sh pruefen    # altool --validate-app
+bash AppStore/build-ipa.sh hochladen  # altool --upload-app
+```
+
 ## Aufbau
 
 ```
