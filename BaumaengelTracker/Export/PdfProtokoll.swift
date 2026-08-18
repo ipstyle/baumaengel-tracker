@@ -173,8 +173,28 @@ private final class Seitensatz {
     func raumTitel(nummer: Int, raum: RaumDaten) {
         platz(60)
         y += 6
+
+        // Dasselbe Zeichen wie in der App — das Protokoll wird damit auf einen
+        // Blick lesbar, auch für jemanden, der es nur überfliegt.
+        let akzent = UIColor(red: 0.85, green: 0.42, blue: 0.10, alpha: 1)
+        let einstellung = UIImage.SymbolConfiguration(pointSize: 13, weight: .medium)
+        if let zeichen = UIImage(systemName: raumSymbol(raum.name), withConfiguration: einstellung)?
+            .withTintColor(akzent, renderingMode: .alwaysOriginal) {
+            // Direkt in den PDF-Kontext gezeichnet wird aus dem Symbol ein
+            // volles Rechteck. Der Umweg über ein Bitmap mit Alphakanal behält
+            // die Form.
+            let masse = CGSize(width: 15, height: 14)
+            let art = UIGraphicsImageRendererFormat.default()
+            art.opaque = false
+            art.scale = 4
+            let bitmap = UIGraphicsImageRenderer(size: masse, format: art).image { _ in
+                zeichen.draw(in: einpassen(zeichen.size, in: CGRect(origin: .zero, size: masse)))
+            }
+            bitmap.draw(in: CGRect(x: rand, y: y + 3, width: masse.width, height: masse.height))
+        }
+
         zeichne("\(nummer). \(raum.name)", schrift: .systemFont(ofSize: 15, weight: .semibold),
-                farbe: .black, bei: CGRect(x: rand, y: y, width: breite - 120, height: 20))
+                farbe: .black, bei: CGRect(x: rand + 22, y: y, width: breite - 142, height: 20))
         let rechts = raum.anzahlMaengel == 0
             ? ""
             : "\(maengelText(raum.anzahlMaengel)) · \(raum.anzahlOffen) offen"

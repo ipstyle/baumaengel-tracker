@@ -1,5 +1,12 @@
 import SwiftUI
 
+/// Kleiner Träger, damit `.sheet(item:)` eine Identität hat — für das PDF
+/// wie für die Sicherungsdatei.
+struct DateiZumTeilen: Identifiable {
+    let id = UUID()
+    let adresse: URL
+}
+
 extension Color {
     /// Die Akzentfarbe der App. Blätter erben `accentColor` nicht zuverlässig,
     /// darum wird sie an jedem Blatt ausdrücklich als `tint` gesetzt.
@@ -8,14 +15,32 @@ extension Color {
     static let statusBehoben = Color(red: 0.16, green: 0.55, blue: 0.31)
 }
 
+/// Symbol in einem getönten Feld — gibt den Listen ihren grafischen Halt.
+struct SymbolFeld: View {
+    let symbol: String
+    var farbe: Color = .marke
+    var kante: CGFloat = 38
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: kante * 0.28, style: .continuous)
+            .fill(farbe.opacity(0.14))
+            .frame(width: kante, height: kante)
+            .overlay(
+                Image(systemName: symbol)
+                    .font(.system(size: kante * 0.46, weight: .medium))
+                    .foregroundStyle(farbe))
+    }
+}
+
 /// Kleine Statusmarke — dieselbe Sprache wie im PDF.
 struct StatusBadge: View {
     let behoben: Bool
     var ueberfaellig: Bool = false
 
     var body: some View {
-        Text(text)
+        Label(text, systemImage: symbol)
             .font(.caption2.weight(.semibold))
+            .labelStyle(.titleAndIcon)
             .padding(.horizontal, 7)
             .padding(.vertical, 3)
             .background(farbe.opacity(0.15), in: Capsule())
@@ -25,6 +50,11 @@ struct StatusBadge: View {
     private var text: String {
         if behoben { return "Behoben" }
         return ueberfaellig ? "Überfällig" : "Offen"
+    }
+
+    private var symbol: String {
+        if behoben { return "checkmark.circle.fill" }
+        return ueberfaellig ? "exclamationmark.triangle.fill" : "circle.dotted"
     }
 
     private var farbe: Color {

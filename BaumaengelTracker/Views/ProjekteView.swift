@@ -8,6 +8,7 @@ struct ProjekteView: View {
     @Query(sort: \Projekt.erstelltAm, order: .reverse) private var projekte: [Projekt]
 
     @State private var neuesProjekt = false
+    @State private var einstellungen = false
     @State private var zuBearbeiten: Projekt?
 
     var body: some View {
@@ -26,6 +27,13 @@ struct ProjekteView: View {
             }
             .navigationTitle("Projekte")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        einstellungen = true
+                    } label: {
+                        Label("Einstellungen", systemImage: "gearshape")
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         neuesProjekt = true
@@ -33,6 +41,9 @@ struct ProjekteView: View {
                         Label("Projekt anlegen", systemImage: "plus")
                     }
                 }
+            }
+            .sheet(isPresented: $einstellungen) {
+                EinstellungenView()
             }
             .sheet(isPresented: $neuesProjekt) {
                 ProjektEditor(projekt: nil) { name, adresse in
@@ -86,7 +97,9 @@ private struct ProjektZeile: View {
     let projekt: Projekt
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        HStack(spacing: 12) {
+            SymbolFeld(symbol: "building.2.fill", kante: 44)
+            VStack(alignment: .leading, spacing: 4) {
             Text(projekt.name)
                 .font(.headline)
             if !projekt.adresse.isEmpty {
@@ -108,6 +121,7 @@ private struct ProjektZeile: View {
             }
             .font(.caption)
             .foregroundStyle(.secondary)
+            }
         }
         .padding(.vertical, 2)
     }

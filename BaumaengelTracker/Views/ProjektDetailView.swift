@@ -9,7 +9,8 @@ struct ProjektDetailView: View {
 
     @State private var neuerRaum = ""
     @State private var raumAbfrage = false
-    @State private var pdfDatei: PdfDatei?
+    @State private var vorlageAbfrage = false
+    @State private var pdfDatei: DateiZumTeilen?
     @State private var pdfLaeuft = false
     @State private var fehlertext: String?
 
@@ -46,6 +47,14 @@ struct ProjektDetailView: View {
                 } label: {
                     Label("Raum hinzufügen", systemImage: "plus.circle.fill")
                 }
+
+                if !fehlendeStandardraeume.isEmpty {
+                    Button {
+                        vorlageAbfrage = true
+                    } label: {
+                        Label("Standardräume hinzufügen", systemImage: "square.grid.2x2")
+                    }
+                }
             }
 
             Section {
@@ -71,6 +80,14 @@ struct ProjektDetailView: View {
             RaumDetailView(raum: raum)
         }
         .toolbar { EditButton() }
+        .confirmationDialog("Standardräume hinzufügen",
+                            isPresented: $vorlageAbfrage, titleVisibility: .visible) {
+            Button("\(fehlendeStandardraeume.count) Räume anlegen") { vorlageAnwenden() }
+            Button("Abbrechen", role: .cancel) {}
+        } message: {
+            Text(fehlendeStandardraeume.joined(separator: ", ")
+                 + "\n\nBereits vorhandene Räume werden übersprungen. Umbenennen und sortieren kannst du danach.")
+        }
         .alert("Neuer Raum", isPresented: $raumAbfrage) {
             TextField("Name, z. B. Küche", text: $neuerRaum)
             Button("Abbrechen", role: .cancel) {}
@@ -85,6 +102,22 @@ struct ProjektDetailView: View {
         }
         .sheet(item: $pdfDatei) { datei in
             PdfVorschau(adresse: datei.adresse, titel: projekt.name)
+        }
+    }
+
+    /// Nur, was es noch nicht gibt — der Knopf darf nichts doppelt anlegen.
+    private var fehlendeStandardraeume: [String] {
+        let vorhanden = Set(projekt.raeumeSortiert.map { $0.name.lowercased() })
+        return standardRaeume.filter { !vorhanden.contains($0.lowercased()) }
+    }
+
+    private func vorlageAnwenden() {
+        var naechste = (projekt.raeumeSortiert.last?.reihenfolge ?? -1) + 1
+        for name in fehlendeStandardraeume {
+            let raum = Raum(name: name, reihenfolge: naechste)
+            raum.projekt = projekt
+            kontext.insert(raum)
+            naechste += 1
         }
     }
 
@@ -124,7 +157,7 @@ struct ProjektDetailView: View {
                 let adresse = try await Task.detached(priority: .userInitiated) {
                     try PdfProtokoll.erstellen(aus: abzug)
                 }.value
-                pdfDatei = PdfDatei(adresse: adresse)
+                pdfDatei = DateiZumTeilen(adresse: adresse)
             } catch {
                 fehlertext = error.localizedDescription
             }
@@ -137,7 +170,8 @@ private struct RaumZeile: View {
     let raum: Raum
 
     var body: some View {
-        HStack {
+        HStack(spacing: 12) {
+            SymbolFeld(symbol: raumSymbol(raum.name))
             VStack(alignment: .leading, spacing: 3) {
                 Text(raum.name)
                 Text(raum.anzahlMaengel == 0
@@ -157,10 +191,4 @@ private struct RaumZeile: View {
             }
         }
     }
-}
-
-/// Kleiner Träger, damit `.sheet(item:)` eine Identität hat.
-struct PdfDatei: Identifiable {
-    let id = UUID()
-    let adresse: URL
 }

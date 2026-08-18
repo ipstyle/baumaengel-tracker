@@ -1,5 +1,5 @@
 #!/bin/bash
-# Store-Bildschirmfotos im Pflichtmass 6,9" (1320×2868) aufnehmen.
+# Store-Bildschirmfotos im Pflichtmass 6,9" (1320×2868) aufnehmen — im Dunkeldesign.
 #
 #   bash scripts/screenshots.sh vorbereiten     # bauen, frisch installieren, Demodaten, saubere Statusleiste
 #   bash scripts/screenshots.sh bild 1-projekte # aktuellen Bildschirm ablegen
@@ -37,6 +37,9 @@ vorbereiten)
     xcrun simctl install "$UDID" \
         "$WURZEL/build/dd/Build/Products/Debug-iphonesimulator/BaumaengelTracker.app"
 
+    # Store-Bilder immer im Dunkeldesign — sie wirken deutlich ruhiger.
+    xcrun simctl ui "$UDID" appearance dark
+
     # Neutrale Statusleiste, wie Apple sie in eigenen Bildern zeigt
     xcrun simctl status_bar "$UDID" override \
         --time "9:41" --dataNetwork wifi --wifiMode active --wifiBars 3 \
@@ -56,6 +59,7 @@ bild)
 zuruecksetzen)
     UDID="$(udid)"
     xcrun simctl status_bar "$UDID" clear
+    xcrun simctl ui "$UDID" appearance light
     echo "✓ Statusleiste zurückgesetzt"
     ;;
 *)
