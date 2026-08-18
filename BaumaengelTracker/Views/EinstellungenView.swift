@@ -144,7 +144,7 @@ struct EinstellungenView: View {
                 Label("Datenschutz", systemImage: "hand.raised")
             }
             LabeledContent("Lizenz", value: "MIT")
-            LabeledContent("Copyright", value: "© 2026 ipstyle")
+            LabeledContent("Copyright", value: "© 2026 Albert Frick")
         } header: {
             Text("Über")
         } footer: {
