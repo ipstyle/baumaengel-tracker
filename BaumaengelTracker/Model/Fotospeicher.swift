@@ -61,6 +61,24 @@ enum Fotospeicher {
         return UIImage(data: daten)
     }
 
+    /// Für die Sicherung: auf 1600 px verkleinert und als JPEG codiert. Der
+    /// Beleg bleibt aussagekräftig, die Datei versendbar.
+    static func fuerSicherung(_ name: String) -> Data? {
+        guard let voll = bild(name) else { return nil }
+        return verkleinern(voll, maximaleKante: 1600).jpegData(compressionQuality: 0.75)
+    }
+
+    /// Legt Bilddaten aus einer Sicherung unter einem neuen Namen ab.
+    static func ablegen(_ daten: Data) -> String? {
+        let name = UUID().uuidString + ".jpg"
+        do {
+            try daten.write(to: url(name), options: .atomic)
+            return name
+        } catch {
+            return nil
+        }
+    }
+
     static func loeschen(_ name: String) {
         try? FileManager.default.removeItem(at: url(name))
         vorschauCache.removeAllObjects()

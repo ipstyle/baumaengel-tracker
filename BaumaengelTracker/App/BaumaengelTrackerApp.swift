@@ -31,8 +31,19 @@ struct BaumaengelTrackerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ProjekteView()
+            Wurzel()
         }
         .modelContainer(container)
+    }
+}
+
+/// Sitzt zwischen Fenster und Projektliste, damit die Wahl des Erscheinungsbilds
+/// auch für Blätter und die PDF-Vorschau gilt.
+private struct Wurzel: View {
+    @AppStorage(Schluessel.erscheinungsbild) private var bildRoh = Erscheinungsbild.system.rawValue
+
+    var body: some View {
+        ProjekteView()
+            .preferredColorScheme(Erscheinungsbild(rawValue: bildRoh)?.farbschema)
     }
 }

@@ -115,6 +115,10 @@ extension Date {
     }
 }
 
+/// Vorlage für den Knopf «Standardräume hinzufügen».
+let standardRaeume = ["Küche", "Wohnzimmer", "Bad1", "Bad2",
+                      "Reduit", "Keller", "Flur", "Zimmer1"]
+
 /// Deutscher Plural von Hand — zuverlässiger als automatische Beugung.
 func maengelText(_ anzahl: Int) -> String {
     anzahl == 1 ? "1 Mangel" : "\(anzahl) Mängel"

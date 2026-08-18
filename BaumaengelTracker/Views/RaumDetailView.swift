@@ -7,7 +7,8 @@ struct RaumDetailView: View {
     @Bindable var raum: Raum
     @Environment(\.modelContext) private var kontext
 
-    @AppStorage("statusfilter") private var filterRoh = Statusfilter.alle.rawValue
+    @AppStorage(Schluessel.statusfilter) private var filterRoh = Statusfilter.alle.rawValue
+    @AppStorage(Schluessel.kompakt) private var kompakt = false
     @State private var neuerMangel = false
     @State private var zuBearbeiten: Mangel?
 
@@ -46,7 +47,7 @@ struct RaumDetailView: View {
                         Button {
                             zuBearbeiten = paar.element
                         } label: {
-                            MangelZeile(nummer: nummer(fuer: paar.element), mangel: paar.element)
+                            MangelZeile(nummer: nummer(fuer: paar.element), mangel: paar.element, kompakt: kompakt)
                         }
                         .buttonStyle(.plain)
                         .swipeActions(edge: .leading) {
@@ -107,15 +108,18 @@ struct RaumDetailView: View {
 private struct MangelZeile: View {
     let nummer: Int
     let mangel: Mangel
+    let kompakt: Bool
+
+    private var kante: CGFloat { kompakt ? 40 : 56 }
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             if let erstes = mangel.fotoNamen.first {
-                FotoVorschau(name: erstes, kante: 56)
+                FotoVorschau(name: erstes, kante: kante)
             } else {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .fill(Color(.secondarySystemFill))
-                    .frame(width: 56, height: 56)
+                    .frame(width: kante, height: kante)
                     .overlay(
                         Image(systemName: "photo")
                             .foregroundStyle(.tertiary))
@@ -128,9 +132,9 @@ private struct MangelZeile: View {
                         .foregroundStyle(.secondary)
                     Text(mangel.titel)
                         .font(.body.weight(.medium))
-                        .lineLimit(2)
+                        .lineLimit(kompakt ? 1 : 2)
                 }
-                if !mangel.notiz.isEmpty {
+                if !mangel.notiz.isEmpty, !kompakt {
                     Text(mangel.notiz)
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -138,7 +142,7 @@ private struct MangelZeile: View {
                 }
                 HStack(spacing: 8) {
                     StatusBadge(behoben: mangel.behoben, ueberfaellig: mangel.fristUeberschritten)
-                    if mangel.fotoNamen.count > 1 {
+                    if mangel.fotoNamen.count > 1, !kompakt {
                         Label("\(mangel.fotoNamen.count)", systemImage: "photo.on.rectangle")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
