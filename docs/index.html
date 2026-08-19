@@ -1,151 +1,248 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Baumängel Tracker — Mängelprotokoll mit Fotodokumentation</title>
-<meta name="description" content="Räume anlegen, Mängel mit Foto und Notiz erfassen, abhaken und als PDF-Protokoll weitergeben. Kein Konto, keine Werbung, alles bleibt auf dem Gerät.">
+<title>Baumängel Tracker — ipstyle</title>
+<meta name="description" content="Snag lists for iPhone: rooms, defects with photo and deadline, tick them off, hand over a clean PDF report. Everything stays on the device. Open source, MIT.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <style>
   :root {
     color-scheme: light dark;
-    --bg: #ffffff; --fg: #16181d; --muted: #5d636e; --line: #e3e6ea;
-    --card: #f7f8fa; --accent: #d96b1a; --accent-fg: #ffffff;
+    --bg:#ffffff; --fg:#16181d; --muted:#5d636e; --line:#e3e6ea;
+    --card:#f7f8fa; --accent:#b3560e; --accent-fg:#ffffff;
+    --strip:#ffffff; --strip-o:.72; --track:#c4cad3; --knock:#f7f8fa;
+    --hero1:#f7f8fa; --hero2:#eaeef4; --glow:.16;
   }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #14161a; --fg: #e9eaee; --muted: #a0a6b0; --line: #2a2e36;
-            --card: #1c1f25; --accent: #ed852e; --accent-fg: #141013; }
+    :root { --bg:#14161a; --fg:#e9eaee; --muted:#a0a6b0; --line:#2a2e36;
+            --card:#1c1f25; --accent:#ed852e; --accent-fg:#141013;
+            --strip:#0f1115; --strip-o:.55; --track:#3a4049; --knock:#14161a;
+            --hero1:#1c1f25; --hero2:#14161a; --glow:.22; }
   }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--fg);
-         font: 16px/1.65 -apple-system, "Helvetica Neue", system-ui, sans-serif; }
-  .wrap { max-width: 940px; margin: 0 auto; padding: 0 1.25rem; }
-  header { text-align: center; padding: 4rem 0 2.5rem; }
-  .icon { width: 104px; height: 104px; border-radius: 24px; display: block; margin: 0 auto 1.2rem; }
-  h1 { font-size: 2.4rem; margin: 0 0 .4rem; letter-spacing: -.02em; }
-  .tagline { font-size: 1.15rem; color: var(--muted); margin: 0 0 1.6rem; }
-  .badges { display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.6rem; }
-  .badge { font-size: .82rem; color: var(--muted); border: 1px solid var(--line);
-           border-radius: 999px; padding: .25rem .85rem; }
-  .cta { display: inline-block; background: var(--accent); color: var(--accent-fg);
-         text-decoration: none; font-weight: 600; padding: .75rem 1.5rem;
-         border-radius: 10px; margin: 0 .3rem .6rem; }
-  .cta.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
-  h2 { font-size: 1.3rem; margin: 3rem 0 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--line); }
-  .shots { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: .6rem; }
-  .shots img { height: 460px; border-radius: 14px; border: 1px solid var(--line); flex: 0 0 auto; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1rem 1.1rem; }
-  .card h3 { margin: 0 0 .5rem; font-size: 1rem; }
-  .card ul { margin: 0; padding-left: 1.1rem; color: var(--muted); font-size: .93rem; }
-  table { width: 100%; border-collapse: collapse; font-size: .93rem; }
-  td, th { text-align: left; padding: .55rem .2rem; border-bottom: 1px solid var(--line); vertical-align: top; }
-  th { color: var(--muted); font-weight: 600; }
-  p { color: var(--fg); }
-  .muted { color: var(--muted); }
-  code { background: var(--card); border: 1px solid var(--line); border-radius: 6px;
-         padding: .1rem .4rem; font-size: .88em; }
-  footer { margin: 4rem 0 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line);
-           color: var(--muted); font-size: .88rem; text-align: center; }
-  a { color: var(--accent); }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg);
+         font:16px/1.6 -apple-system, "Helvetica Neue", system-ui, sans-serif;
+         -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:940px; margin:0 auto; padding:0 1.25rem; position:relative; }
+  .lang { position:absolute; top:1rem; right:1.25rem; display:flex; gap:.25rem;
+          border:1px solid var(--line); border-radius:999px; padding:.2rem; background:var(--card); z-index:2; }
+  .lang button { border:0; background:none; color:var(--muted); font:600 .8rem/1 inherit;
+                 padding:.4rem .7rem; border-radius:999px; cursor:pointer; }
+  .lang button[aria-pressed="true"] { background:var(--accent); color:var(--accent-fg); }
+  .zurueck { display:inline-block; margin:1.1rem 0 0; font-size:.86rem; color:var(--muted);
+             text-decoration:none; }
+  .zurueck:hover { color:var(--accent); }
+  .hero { display:block; width:100%; height:auto; border-radius:18px; overflow:hidden; margin:1.2rem 0 0; }
+  .kopf { text-align:center; padding:1.6rem 0 .4rem; }
+  .kopf img.icon { width:88px; height:88px; border-radius:20px; display:block; margin:0 auto .9rem;
+                   border:1px solid var(--line); }
+  h1 { font-size:2.2rem; letter-spacing:-.02em; margin:0 0 .1rem; }
+  .pill { display:inline-block; font-size:.72rem; font-weight:700; letter-spacing:.04em;
+          text-transform:uppercase; border-radius:999px; padding:.2rem .6rem; margin-left:.4rem;
+          background:var(--line); color:var(--muted); vertical-align:.22em; }
+  .lede { font-size:1.2rem; color:var(--muted); text-align:center; max-width:34em;
+          margin:1rem auto 1.4rem; }
+  .trust { display:flex; flex-wrap:wrap; gap:.55rem; justify-content:center; margin:0 0 1.8rem; }
+  .trust-pill { display:inline-flex; align-items:center; gap:.5rem;
+                background:var(--card); border:1px solid var(--line); border-radius:999px;
+                padding:.4rem .95rem .4rem .5rem; font-size:.86rem; font-weight:600; color:var(--fg); }
+  .trust-pill svg { width:19px; height:19px; flex:0 0 auto; }
+  .trust-pill svg circle { fill:var(--accent); opacity:.16; }
+  .trust-pill svg path { stroke:var(--accent); stroke-width:1.8; fill:none;
+                         stroke-linecap:round; stroke-linejoin:round; }
+  .cta { display:inline-block; background:var(--accent); color:var(--accent-fg);
+         text-decoration:none; font-weight:600; padding:.7rem 1.4rem; border-radius:10px;
+         margin:0 .3rem .6rem; }
+  .cta.zweit { background:transparent; color:var(--accent); border:1px solid var(--accent); }
+  .mitte { text-align:center; margin-bottom:2.4rem; }
+  h2 { font-size:1.5rem; letter-spacing:-.02em; margin:2.8rem 0 .4rem; }
+  .sub { color:var(--muted); margin:0 0 1.4rem; }
+  .shots { display:flex; gap:1rem; overflow-x:auto; padding-bottom:.6rem; scroll-snap-type:x mandatory; }
+  .shots figure { margin:0; flex:0 0 auto; scroll-snap-align:start; }
+  .shots img { height:340px; width:auto; border-radius:10px; border:1px solid var(--line); display:block; }
+  .shots figcaption { font-size:.8rem; color:var(--muted); margin-top:.5rem; max-width:170px; }
+  .cols { display:grid; gap:1.25rem 2rem; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); }
+  .cols h3 { font-size:1rem; margin:0 0 .35rem; }
+  .cols p, .cols ul { color:var(--muted); font-size:.94rem; margin:0; }
+  .cols ul { padding-left:1.1rem; }
+  .karte { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:1.25rem 1.4rem; }
+  table { width:100%; border-collapse:collapse; font-size:.93rem; }
+  td, th { text-align:left; padding:.55rem .2rem; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; }
+  code { background:var(--card); border:1px solid var(--line); border-radius:6px;
+         padding:.1rem .4rem; font-size:.88em; }
+  a { color:var(--accent); }
+  footer { border-top:1px solid var(--line); margin-top:3rem; padding:2rem 0 3rem;
+           color:var(--muted); font-size:.85rem; }
+  @media (max-width:640px) {
+    h1 { font-size:1.8rem; }
+    .lede { font-size:1.05rem; }
+    .shots img { height:280px; }
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<header>
-  <img class="icon" src="appicon.png" alt="App-Symbol Baumängel Tracker">
-  <h1>Baumängel Tracker</h1>
-  <p class="tagline">Mängel erfassen, mit Foto belegen, als PDF-Protokoll weitergeben.<br>Alles exportier- und wieder einlesbar — deine Daten bleiben deine.</p>
-  <div class="badges">
-    <span class="badge">Gratis</span>
-    <span class="badge">Quelloffen · MIT</span>
-    <span class="badge">Kein Konto</span>
-    <span class="badge">Keine Werbung</span>
-    <span class="badge">Ohne Netzwerkzugriff</span>
-    <span class="badge">Export &amp; Import</span>
+  <div class="lang" role="group" aria-label="Language">
+    <button type="button" data-lang="en" aria-pressed="true">EN</button>
+    <button type="button" data-lang="de" aria-pressed="false">DE</button>
   </div>
-  <a class="cta" href="https://github.com/ipstyle/baumaengel-tracker">Quellcode auf GitHub</a>
-  <a class="cta secondary" href="https://github.com/ipstyle/baumaengel-tracker/issues">Support &amp; Fehler melden</a>
-</header>
 
-<h2>So sieht es aus</h2>
-<div class="shots">
-  <img src="1-projekte.png" alt="Projektliste mit offenen Mängeln">
-  <img src="3-maengel.png" alt="Mängelliste eines Raums mit Filter">
-  <img src="5-pdf.png" alt="Fertiges PDF-Protokoll">
+  <a class="zurueck" href="https://ipstyle.github.io/"
+     data-en="← All apps by ipstyle" data-de="← Alle Apps von ipstyle">← All apps by ipstyle</a>
+
+  <!-- Banner ohne Text: Beschriftungen bleiben echtes HTML, damit sie auf dem
+       Handy lesbar sind und mit der Sprache wechseln. -->
+  <svg class="hero" viewBox="0 0 1200 300" role="img"
+       aria-label="Baumängel Tracker — rooms, defects, photos, PDF report"
+       xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="hg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="var(--hero1)"/><stop offset="1" stop-color="var(--hero2)"/>
+      </linearGradient>
+    </defs>
+    <rect width="1200" height="300" fill="url(#hg)"/>
+    <g opacity="0.9">
+      <rect x="120" y="70" width="150" height="160" rx="14" fill="var(--card)" stroke="var(--line)" stroke-width="2"/>
+      <rect x="300" y="70" width="150" height="160" rx="14" fill="var(--card)" stroke="var(--line)" stroke-width="2"/>
+      <rect x="480" y="70" width="150" height="160" rx="14" fill="var(--card)" stroke="var(--line)" stroke-width="2"/>
+      <rect x="660" y="70" width="150" height="160" rx="14" fill="var(--card)" stroke="var(--line)" stroke-width="2"/>
+      <g stroke="var(--accent)" stroke-width="7" stroke-linecap="round" fill="none">
+        <path d="M155 120h60M155 150h80M155 180h45"/>
+        <path d="M335 120h80M335 150h55M335 180h70"/>
+        <path d="M515 120h55M515 150h75M515 180h40"/>
+        <path d="M695 120h70M695 150h45M695 180h65"/>
+      </g>
+      <g fill="var(--accent)" opacity=".2">
+        <circle cx="900" cy="150" r="110"/>
+      </g>
+      <path d="M845 150l38 40 78-84" stroke="var(--accent)" stroke-width="18"
+            stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </g>
+  </svg>
+
+  <div class="kopf">
+    <img class="icon" src="appicon.png" alt="Baumängel Tracker app icon">
+    <h1>Baumängel Tracker
+      <span class="pill" data-en="In App Review" data-de="Im App-Review">In App Review</span></h1>
+    <p class="lede"
+       data-en="Snag lists for iPhone — rooms, defects with photo and deadline, tick them off, and hand over a clean PDF report. Everything stays on the device."
+       data-de="Mängelprotokoll fürs iPhone — Räume, Mängel mit Foto und Frist, abhaken, und zur Übergabe ein sauberes PDF. Alles bleibt auf dem Gerät.">Snag lists for iPhone — rooms, defects with photo and deadline, tick them off, and hand over a clean PDF report. Everything stays on the device.</p>
+
+    <div class="trust">
+      <span class="trust-pill"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11"/><path d="M7 12.5l3.2 3.2L17 9"/></svg><span data-en="Free" data-de="Gratis">Free</span></span>
+      <span class="trust-pill"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11"/><path d="M9.5 8.5L6 12l3.5 3.5M14.5 8.5L18 12l-3.5 3.5"/></svg><span data-en="Open source · MIT" data-de="Quelloffen · MIT">Open source · MIT</span></span>
+      <span class="trust-pill"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11"/><path d="M12 7v6M12 16.5v.5"/></svg><span data-en="No account" data-de="Kein Konto">No account</span></span>
+      <span class="trust-pill"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11"/><path d="M6 6l12 12M18 6L6 18"/></svg><span data-en="No network access" data-de="Ohne Netzwerkzugriff">No network access</span></span>
+      <span class="trust-pill"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11"/><path d="M12 6v9M8.5 11.5L12 15l3.5-3.5M7 18h10"/></svg><span data-en="Export &amp; import" data-de="Export &amp; Import">Export &amp; import</span></span>
+    </div>
+
+    <div class="mitte">
+      <a class="cta" href="https://github.com/ipstyle/baumaengel-tracker"
+         data-en="Source on GitHub" data-de="Quellcode auf GitHub">Source on GitHub</a>
+      <a class="cta zweit" href="https://github.com/ipstyle/baumaengel-tracker/issues"
+         data-en="Support &amp; bug reports" data-de="Support &amp; Fehler melden">Support &amp; bug reports</a>
+    </div>
+  </div>
+
+  <h2 data-en="What it looks like" data-de="So sieht es aus">What it looks like</h2>
+  <p class="sub" data-en="Screens from the app, in dark appearance." data-de="Bildschirme aus der App, im Dunkeldesign.">Screens from the app, in dark appearance.</p>
+  <div class="shots">
+    <figure><img src="1-projekte.png" alt="Project list with open defects">
+      <figcaption data-en="Projects with open defects" data-de="Projekte mit offenen Mängeln">Projects with open defects</figcaption></figure>
+    <figure><img src="2-raeume.png" alt="Rooms with progress bar">
+      <figcaption data-en="Rooms, each with its own icon" data-de="Räume, jeder mit eigenem Zeichen">Rooms, each with its own icon</figcaption></figure>
+    <figure><img src="3-maengel.png" alt="Defect list with filter">
+      <figcaption data-en="Defects, filtered by status" data-de="Mängel, nach Status gefiltert">Defects, filtered by status</figcaption></figure>
+    <figure><img src="4-mangel.png" alt="Defect with photos and deadline">
+      <figcaption data-en="Photos, note and deadline" data-de="Fotos, Notiz und Frist">Photos, note and deadline</figcaption></figure>
+    <figure><img src="5-pdf.png" alt="Finished PDF report">
+      <figcaption data-en="The finished PDF report" data-de="Das fertige PDF-Protokoll">The finished PDF report</figcaption></figure>
+  </div>
+
+  <h2 data-en="What it does" data-de="Was die App macht">What it does</h2>
+  <div class="cols">
+    <div><h3 data-en="Projects and rooms" data-de="Projekte und Räume">Projects and rooms</h3>
+      <ul>
+        <li data-en="One object per project, with address and progress" data-de="Ein Objekt je Projekt, mit Adresse und Fortschritt">One object per project, with address and progress</li>
+        <li data-en="Rooms in your own order, standard rooms in one tap" data-de="Räume in eigener Reihenfolge, Standardräume auf einen Griff">Rooms in your own order, standard rooms in one tap</li>
+      </ul></div>
+    <div><h3 data-en="Defects" data-de="Mängel">Defects</h3>
+      <ul>
+        <li data-en="Title, note and optional deadline" data-de="Titel, Notiz und optionale Frist">Title, note and optional deadline</li>
+        <li data-en="Open or fixed, with the date it was fixed" data-de="Offen oder behoben, mit Behoben-Datum">Open or fixed, with the date it was fixed</li>
+        <li data-en="Overdue deadlines are marked" data-de="Überfällige Fristen sind markiert">Overdue deadlines are marked</li>
+      </ul></div>
+    <div><h3 data-en="Photos" data-de="Fotos">Photos</h3>
+      <ul>
+        <li data-en="Camera or photo picker, several per defect" data-de="Kamera oder Fotoauswahl, mehrere je Mangel">Camera or photo picker, several per defect</li>
+        <li data-en="Full screen, deletable one by one" data-de="Vollbild, einzeln löschbar">Full screen, deletable one by one</li>
+      </ul></div>
+    <div><h3 data-en="PDF report" data-de="PDF-Protokoll">PDF report</h3>
+      <ul>
+        <li data-en="A4 with header, summary and page numbers" data-de="A4 mit Kopfdaten, Zusammenfassung und Seitenzahlen">A4 with header, summary and page numbers</li>
+        <li data-en="One section per room, one block per defect" data-de="Je Raum ein Abschnitt, je Mangel ein Block">One section per room, one block per defect</li>
+      </ul></div>
+  </div>
+
+  <h2 data-en="Your data, your control" data-de="Deine Daten, deine Kontrolle">Your data, your control</h2>
+  <div class="karte">
+    <p data-en="What you record belongs to you, and you can get all of it out at any time. A backup writes every project, room, defect and photo into a single file that you can put wherever you like. On import you decide whether it is added to your data or replaces it. No account, no cloud, no lock-in: changing device means importing the backup and carrying on."
+       data-de="Was du erfasst hast, gehört dir — und du kommst jederzeit vollständig heran. Eine Sicherung schreibt alle Projekte, Räume, Mängel und Fotos in eine einzige Datei, die du ablegen kannst, wo du willst. Beim Einlesen entscheidest du, ob sie angefügt wird oder den Bestand ersetzt. Kein Konto, keine Cloud, keine Bindung an einen Anbieter: Gerätewechsel heisst Sicherung einlesen und weiterarbeiten.">What you record belongs to you, and you can get all of it out at any time. A backup writes every project, room, defect and photo into a single file that you can put wherever you like. On import you decide whether it is added to your data or replaces it. No account, no cloud, no lock-in: changing device means importing the backup and carrying on.</p>
+  </div>
+
+  <h2 data-en="Requirements and permissions" data-de="Voraussetzungen und Freigaben">Requirements and permissions</h2>
+  <p class="sub" data-en="iPhone, iOS 17 or later, portrait. The app is in German." data-de="iPhone ab iOS 17, Hochformat. Die App ist auf Deutsch.">iPhone, iOS 17 or later, portrait. The app is in German.</p>
+  <table>
+    <tr><th data-en="For what" data-de="Wofür">For what</th><th data-en="Permission" data-de="Freigabe">Permission</th></tr>
+    <tr><td data-en="Taking a photo" data-de="Foto aufnehmen">Taking a photo</td>
+        <td data-en="Camera — optional; the photo picker works without it" data-de="Kamera — freiwillig; ohne sie geht es über die Fotoauswahl">Camera — optional; the photo picker works without it</td></tr>
+    <tr><td data-en="Choosing an image" data-de="Bild auswählen">Choosing an image</td>
+        <td data-en="System photo picker, no access to the whole library" data-de="System-Fotoauswahl, ohne Zugriff auf die ganze Mediathek">System photo picker, no access to the whole library</td></tr>
+  </table>
+
+  <h2 data-en="Privacy" data-de="Datenschutz">Privacy</h2>
+  <p data-en-html="The app collects nothing and makes no network connections. Projects, rooms, defects, notes and photos stay in the app's protected storage on the device. A report leaves the device only when you share it yourself. Full text: <a href=&quot;https://github.com/ipstyle/baumaengel-tracker/blob/main/PRIVACY.md&quot;>PRIVACY.md</a>"
+     data-de-html="Die App erfasst keine Daten und stellt keine Netzwerkverbindung her. Projekte, Räume, Mängel, Notizen und Fotos liegen im geschützten Datenbereich der App auf dem Gerät. Ein Protokoll verlässt das Gerät nur, wenn du es selbst teilst. Vollständig: <a href=&quot;https://github.com/ipstyle/baumaengel-tracker/blob/main/PRIVACY.md&quot;>PRIVACY.md</a>">The app collects nothing and makes no network connections. Projects, rooms, defects, notes and photos stay in the app's protected storage on the device. A report leaves the device only when you share it yourself. Full text: <a href="https://github.com/ipstyle/baumaengel-tracker/blob/main/PRIVACY.md">PRIVACY.md</a></p>
+
+  <h2 data-en="Build it yourself" data-de="Selbst bauen">Build it yourself</h2>
+  <p class="sub" data-en-html="The Xcode project is generated from <code>project.yml</code>: <code>brew install xcodegen</code> · <code>xcodegen generate</code>. Source: <a href=&quot;https://github.com/ipstyle/baumaengel-tracker&quot;>github.com/ipstyle/baumaengel-tracker</a>"
+     data-de-html="Das Xcode-Projekt entsteht aus <code>project.yml</code>: <code>brew install xcodegen</code> · <code>xcodegen generate</code>. Quellcode: <a href=&quot;https://github.com/ipstyle/baumaengel-tracker&quot;>github.com/ipstyle/baumaengel-tracker</a>">The Xcode project is generated from <code>project.yml</code>: <code>brew install xcodegen</code> · <code>xcodegen generate</code>. Source: <a href="https://github.com/ipstyle/baumaengel-tracker">github.com/ipstyle/baumaengel-tracker</a></p>
+
+  <footer>
+    <p data-en-html="© 2026 Albert Frick · MIT licence · <a href=&quot;https://ipstyle.github.io/&quot;>All apps by ipstyle</a>"
+       data-de-html="© 2026 Albert Frick · MIT-Lizenz · <a href=&quot;https://ipstyle.github.io/&quot;>Alle Apps von ipstyle</a>">© 2026 Albert Frick · MIT licence · <a href="https://ipstyle.github.io/">All apps by ipstyle</a></p>
+  </footer>
+
 </div>
 
-<h2>Was die App macht</h2>
-<div class="grid">
-  <div class="card"><h3>Projekte</h3><ul>
-    <li>Objekt mit Name, Adresse und Datum</li>
-    <li>Mehrere Objekte parallel führen</li>
-    <li>Fortschritt auf einen Blick</li></ul></div>
-  <div class="card"><h3>Räume</h3><ul>
-    <li>Eigene Reihenfolge, per Drag sortierbar</li>
-    <li>Offene Mängel je Raum sichtbar</li></ul></div>
-  <div class="card"><h3>Mängel</h3><ul>
-    <li>Titel, Notiz und Frist</li>
-    <li>Status offen oder behoben, mit Datum</li>
-    <li>Überfällige Fristen sind markiert</li></ul></div>
-  <div class="card"><h3>Fotos</h3><ul>
-    <li>Direkt aufnehmen oder aus der Mediathek</li>
-    <li>Mehrere Bilder je Mangel</li>
-    <li>Vollbild, einzeln löschbar</li></ul></div>
-  <div class="card"><h3>PDF-Protokoll</h3><ul>
-    <li>A4 mit Kopfdaten und Zusammenfassung</li>
-    <li>Je Raum ein Abschnitt, je Mangel ein Block</li>
-    <li>Seitenzahlen, Fotos, teilbar</li></ul></div>
-  <div class="card"><h3>Deine Daten, deine Kontrolle</h3><ul>
-    <li>Alles exportieren — Projekte, Mängel und Fotos in einer Datei</li>
-    <li>Alles wieder einlesen: anfügen oder ersetzen</li>
-    <li>Kein Konto, keine Cloud, keine Anbieterbindung</li></ul></div>
-  <div class="card"><h3>Privatsphäre</h3><ul>
-    <li>Kein Konto, keine Anmeldung</li>
-    <li>Keine Werbung, keine Analyse</li>
-    <li>Alles bleibt auf dem Gerät</li></ul></div>
-</div>
-
-<h2>Voraussetzungen</h2>
-<p class="muted">iPhone ab iOS 17, Hochformat. Die App ist auf Deutsch.</p>
-
-<h2>Freigaben</h2>
-<table>
-  <tr><th>Wofür</th><th>Freigabe</th></tr>
-  <tr><td>Foto aufnehmen</td><td>Kamera — freiwillig; ohne sie geht es über die Fotomediathek</td></tr>
-  <tr><td>Bild auswählen</td><td>System-Fotoauswahl, ohne Zugriff auf die ganze Mediathek</td></tr>
-</table>
-
-<h2>Datenhoheit</h2>
-<p>Was du erfasst hast, gehört dir — und du kommst jederzeit vollständig heran.
-Eine Sicherung schreibt alle Projekte, Räume, Mängel und Fotos in eine einzige
-Datei, die du ablegen kannst, wo du willst. Beim Einlesen entscheidest du, ob die
-Sicherung angefügt wird oder den Bestand ersetzt. Kein Konto, keine Cloud, keine
-Bindung an einen Anbieter: Gerätewechsel heisst Sicherung einlesen und
-weiterarbeiten.</p>
-
-<h2>Datenschutz</h2>
-<p>Die App erfasst keine Daten und stellt keine Netzwerkverbindung her. Projekte,
-Räume, Mängel, Notizen und Fotos liegen ausschliesslich im geschützten
-Datenbereich der App auf dem Gerät. Ein Protokoll verlässt das Gerät nur, wenn du
-es selbst über das System-Teilen weitergibst.</p>
-<p class="muted">Vollständig: <a href="https://github.com/ipstyle/baumaengel-tracker/blob/main/PRIVACY.md">PRIVACY.md</a></p>
-
-<h2>Support</h2>
-<p>Fragen, Fehler und Wünsche über die
-<a href="https://github.com/ipstyle/baumaengel-tracker/issues">Issues des Projekts</a>.
-Es gibt kein Konto und keine Anmeldung — eine Nachricht dort genügt.</p>
-
-<h2>Selbst bauen</h2>
-<p class="muted">Das Xcode-Projekt entsteht aus <code>project.yml</code>:</p>
-<p><code>brew install xcodegen</code> · <code>xcodegen generate</code> ·
-<code>open BaumaengelTracker.xcodeproj</code></p>
-
-<footer>
-  © 2026 Albert Frick · MIT-Lizenz ·
-  <a href="https://github.com/ipstyle/baumaengel-tracker">github.com/ipstyle/baumaengel-tracker</a>
-</footer>
-
-</div>
+<script>
+(function () {
+  function paint(lang) {
+    document.documentElement.lang = lang;
+    // Erst die HTML-Fassungen — Elemente mit Verweisen brauchen sie, sonst
+    // bliebe der Link beim Sprachwechsel als roher Text stehen.
+    document.querySelectorAll('[data-' + lang + '-html]').forEach(function (el) {
+      el.innerHTML = el.getAttribute('data-' + lang + '-html');
+    });
+    document.querySelectorAll('[data-' + lang + ']').forEach(function (el) {
+      el.textContent = el.getAttribute('data-' + lang);
+    });
+    document.querySelectorAll('.lang button').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.lang === lang));
+    });
+    try { localStorage.setItem('ipstyle-lang', lang); } catch (e) {}
+  }
+  document.querySelectorAll('.lang button').forEach(function (b) {
+    b.addEventListener('click', function () { paint(b.dataset.lang); });
+  });
+  var gespeichert = null;
+  try { gespeichert = localStorage.getItem('ipstyle-lang'); } catch (e) {}
+  var vomGeraet = (navigator.language || 'en').slice(0, 2) === 'de' ? 'de' : 'en';
+  paint(gespeichert || vomGeraet);
+})();
+</script>
 </body>
 </html>
