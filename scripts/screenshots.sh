@@ -12,7 +12,9 @@ set -euo pipefail
 GERAET="${GERAET:-iPhone 17 Pro Max}"
 BUNDLE="com.ip-style.baumaengeltracker"
 WURZEL="$(cd "$(dirname "$0")/.." && pwd)"
-ZIEL="$WURZEL/AppStore/screenshots"
+# Store-Bilder sind Einreichungsmaterial und liegen darum ausserhalb des
+# Repos, unter 01_Admin/ (Geschwister von 02_Git-Repo/).
+ZIEL="$(cd "$WURZEL/.." && pwd)/01_Admin/AppStore/screenshots"
 
 udid() {
     xcrun simctl list devices available \
