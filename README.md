@@ -8,10 +8,10 @@ Kein Konto, keine Werbung, keine Analyse. Alle Daten und Fotos bleiben auf dem
 Gerät.
 
 <p>
-  <img src="AppStore/screenshots/1-projekte.png" width="200" alt="Projektliste">
-  <img src="AppStore/screenshots/2-raeume.png" width="200" alt="Räume mit Fortschritt">
-  <img src="AppStore/screenshots/3-maengel.png" width="200" alt="Mängelliste mit Filter">
-  <img src="AppStore/screenshots/5-pdf.png" width="200" alt="PDF-Protokoll">
+  <img src="docs/1-projekte.png" width="200" alt="Projektliste">
+  <img src="docs/2-raeume.png" width="200" alt="Räume mit Fortschritt">
+  <img src="docs/3-maengel.png" width="200" alt="Mängelliste mit Filter">
+  <img src="docs/5-pdf.png" width="200" alt="PDF-Protokoll">
 </p>
 
 ## Funktionen
@@ -46,6 +46,9 @@ xcodegen generate
 open BaumaengelTracker.xcodeproj
 ```
 
+Zum Signieren für ein Gerät die eigene Team-ID mitgeben:
+`xcodebuild … DEVELOPMENT_TEAM=<deine Team-ID>`
+
 Für einen Lauf im Simulator ohne eigenes Entwicklerkonto:
 
 ```bash
@@ -56,18 +59,6 @@ xcodebuild -project BaumaengelTracker.xcodeproj -scheme BaumaengelTracker \
 
 Mit dem Startargument `-seedDemo` legt die App beim ersten Start neutrale
 Beispieldaten an — dafür ist `scripts/screenshots.sh` gedacht.
-
-## App-Store-Paket
-
-Bundle-ID und App-Store-Profil liegen im Entwicklerkonto; signiert wird bewusst
-manuell, weil Xcode beim Archivieren mit automatischer Signatur ein
-Entwicklungsprofil samt registriertem Gerät verlangt.
-
-```bash
-bash AppStore/build-ipa.sh bauen      # Archiv + IPA, prüft die Kamera-Begründung im Paket
-bash AppStore/build-ipa.sh pruefen    # altool --validate-app
-bash AppStore/build-ipa.sh hochladen  # altool --upload-app
-```
 
 ## Aufbau
 

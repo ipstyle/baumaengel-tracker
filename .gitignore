@@ -16,3 +16,7 @@ xcuserdata/
 
 # macOS
 .DS_Store
+
+# Interner Bereich — Apple-Konto, Store-Metadaten, Einreichungsunterlagen.
+# Gehört nicht ins öffentliche Repo, bleibt aber im Arbeitsordner.
+_intern/
